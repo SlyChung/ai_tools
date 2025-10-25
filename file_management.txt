@@ -1,0 +1,244 @@
+{
+    "name": "ai_tools.file_management",
+    "description": "File management tools for the scribe.",
+    "functions": [
+        {
+            "name": "append_file",
+            "description": "Append to a file",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "content",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "copy_file",
+            "description": "Copy a file to a destination directory",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "destination_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "create_directory",
+            "description": "Create a directory",
+            "parameters": [
+                {
+                    "name": "directory_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "create_file",
+            "description": "Create a file",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "delete_file",
+            "description": "Delete a file",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "describe_module",
+            "description": "Describe a module",
+            "parameters": [
+                {
+                    "name": "module",
+                    "type": "<class 'inspect._empty'>",
+                    "default": null
+                }
+            ],
+            "returns": "None"
+        },
+        {
+            "name": "directory_exists",
+            "description": "Check if a directory exists",
+            "parameters": [
+                {
+                    "name": "directory_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "file_exists",
+            "description": "Check if a file exists",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "list_directories",
+            "description": "List all directories in a directory",
+            "parameters": [
+                {
+                    "name": "directory_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "list_files",
+            "description": "List all files in a directory",
+            "parameters": [
+                {
+                    "name": "directory_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "move_file",
+            "description": "Move a file to a destination directory",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "destination_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "read_file",
+            "description": "Read a file",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "rename_file",
+            "description": "Rename a file",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "new_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        },
+        {
+            "name": "write_file",
+            "description": "Write to a file",
+            "parameters": [
+                {
+                    "name": "file_path",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "file_name",
+                    "type": "<class 'str'>",
+                    "default": null
+                },
+                {
+                    "name": "content",
+                    "type": "<class 'str'>",
+                    "default": null
+                }
+            ],
+            "returns": "<class 'dict'>"
+        }
+    ]
+}

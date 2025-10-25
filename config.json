@@ -1,0 +1,44 @@
+{
+    "logging": {
+        "log_format": {
+            "app":{
+                "level": "INFO",
+                "format": "%(asctime)s - %(levelname)s: %(message)s",
+                "file": "logs/app.log",
+                "console": false
+            },
+            "error": {
+                "level": "ERROR",
+                "format": "%(asctime)s - %(levelname)s: %(message)s",
+                "file": "logs/error.log",
+                "console": false
+            },
+            "api": {
+                "level": "INFO",
+                "format": "%(asctime)s - %(levelname)s: %(message)s",
+                "file": "logs/api.log",
+                "console": false
+            },
+            "vault": {
+                "level": "INFO",
+                "format": "%(asctime)s - %(levelname)s: %(message)s",
+                "file": "logs/vaults",
+                "console": false
+            },
+            "technical": {
+                "level": "DEBUG",
+                "format": "%(asctime)s - %(levelname)s - %(module)s.%(funcName)s: %(message)s",
+                "file": "logs/technical.log",
+                "console": false
+            },
+            "database": {
+                "level": "DEBUG",
+                "format": "%(asctime)s - %(levelname)s - %(module)s.%(funcName)s: %(message)s",
+                "file": "logs/database.log",
+                "console": false
+            }
+        }
+    }
+
+
+}

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eliot-tools"
+version = "0.1.0"
+description = "Unified utilities for the ELIOT AI ecosystem"
+authors = [{name = "Andrew"}]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "os",
+    "shutil",
+    "openai",
+    "anthopic",
+    "json",
+    "logging",
+    "sqlalchemy>=2.0",
+    "alembic",
+    
+
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/eliot_tools"
+
+[tool.setuptools.packages.find]
+where = ["src"]
