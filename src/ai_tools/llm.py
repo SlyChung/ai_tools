@@ -1,21 +1,21 @@
 """
-Tools for working with APIs.
+Tools for working with LLM APIs.
 """
 
-from library.logger import ScribeLogger
+from utilities.logger import Logger
 import os
 from dotenv import load_dotenv
 import openai
 import anthropic
-from tools import file_management as fm
+from ai_tools import file_management as fm
 from llama_cpp import Llama
 import tiktoken
 import json
-from library.config import PROJECT_ROOT
+from utilities.config import PROJECT_ROOT
 
-error_logger = ScribeLogger("error")
-api_logger = ScribeLogger("api")
-technical_logger = ScribeLogger("technical")
+error_logger = Logger("error")
+api_logger = Logger("api")
+technical_logger = Logger("technical")
 
 
 # Load environment variables
@@ -32,6 +32,7 @@ def query_openai(prompt: str, model: str = "gpt-3.5-turbo", temperature: float =
     """
     Query the OpenAI API.
     """
+    technical_logger.log_info(f"llm.query_openai: Querying OpenAI API to model {model}")
 
     input_tokens = gpt_token_count(f"{system_prompt}\n\n{prompt}", model)
     context_window = get_context_window(model)

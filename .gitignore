@@ -1,0 +1,114 @@
+# ===================================
+# Python
+# ===================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+build/
+dist/
+.eggs/
+pip-wheel-metadata/
+
+# ===================================
+# Environments
+# ===================================
+.env
+.venv/
+env/
+venv/
+ENV/
+.ai_tools_env/
+.ai_tools/
+.ai_tools_backup/
+*.conda
+*.ipynb_checkpoints
+
+# ===================================
+# Logs and Cache
+# ===================================
+*.log
+logs/
+log/
+*.out
+*.err
+*.pid
+.cache/
+.pytest_cache/
+coverage/
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+
+# ===================================
+# IDE / Editor
+# ===================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+
+# ===================================
+# OS / System
+# ===================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# ===================================
+# Local Data / Artifacts
+# ===================================
+data/
+datasets/
+notebooks/
+__output__/
+tmp/
+temp/
+*.db
+*.sqlite
+*.sqlite3
+
+# ===================================
+# Project Specific
+# ===================================
+# Ignore your app runtime folders
+/mnt/data/
+/logs/
+/ai_tools/logs/
+/ai_tools/temp/
+/ai_tools/__output__/
+/ai_tools/__cache__/
+/ai_tools/*.db
+/config.json
+/config.yaml
+/secrets.json
+/models/
+
+
+# ===================================
+# Jupyter / Reports
+# ===================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ===================================
+# Backup / Misc
+# ===================================
+*.bak
+*.old
+*.orig
+*.rej
+*.zip
+*.tar
+*.tar.gz
+*.rar

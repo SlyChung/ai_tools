@@ -6,6 +6,7 @@ import shutil
 
 from utilities.config import PROJECT_ROOT
 from utilities.logger import Logger
+from utilities.tool_management import version
 
 error_logger = Logger("error")
 technical_logger = Logger("technical")
@@ -14,6 +15,7 @@ import inspect
 import json
 from pathlib import Path
 
+# Deprecated
 def describe_module(module):
     """
     Describe a module
@@ -32,7 +34,7 @@ def describe_module(module):
         })
     return json.dumps(info, indent=4)
 
-
+# Deprecated
 def create_directory(directory_path: str) -> dict:
     """
     Create a directory
@@ -57,7 +59,8 @@ def create_directory(directory_path: str) -> dict:
             "message": f"Error creating directory: {directory_path}: {e}"
         }
 
-def create_file(file_path: str, file_name: str) -> dict:
+@version("1.0.0")
+def create_file(file_path: str, file_name: str, overwrite: bool = False) -> dict:
     """
     Create a file
     """
@@ -67,23 +70,42 @@ def create_file(file_path: str, file_name: str) -> dict:
 
     technical_logger.log_info(f"file_management.create_file: Creating file: {file_name}")
     try:
+        folder_path.mkdir(parents=True, exist_ok=True)
+
+        existed = full_path.exists()
+        if existed and not overwrite:
+            return {"status": False, 
+                    "data": {
+                        "file_path": str(full_path),
+                        "created": False,
+                        "error": "file_exists"
+                    },
+                    "message": f"File {file_name} already exists"
+                }
+
         with open(full_path, "w") as f:
             f.write("")
         return {
-            "success": True,
+            "status": True,
             "data": {
-                "file_path": full_path
+                "file_path": str(full_path),
+                "created": True,
             },
             "message": f"File {file_name} created successfully"
         }
     except Exception as e:
         error_logger.log_error(f"file_management.create_file: Error creating file: {file_name}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "file_path": str(full_path),
+                "created": False,
+                "error": str(e)
+            },
             "message": f"Error creating file: {file_name}: {e}"
         }
 
+@version("1.0.0")
 def delete_file(file_path: str, file_name: str) -> dict:
     """
     Delete a file
@@ -97,18 +119,26 @@ def delete_file(file_path: str, file_name: str) -> dict:
         if os.path.exists(full_path):
             os.remove(full_path)
         return {
-            "success": True,
-            "data": None,
+            "status": True,
+            "data": {
+                "file_path": str(full_path),
+                "deleted": True,
+            },
             "message": f"File {file_name} deleted successfully"
         }
     except Exception as e:
         error_logger.log_error(f"file_management.delete_file: Error deleting file: {file_name}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "file_path": str(full_path),
+                "deleted": False,
+                "error": str(e)
+            },
             "message": f"Error deleting file: {file_name}: {e}"
         }
 
+@version("1.0.0")
 def read_file(file_path: str, file_name: str) -> dict:
     """
     Read a file
@@ -120,7 +150,7 @@ def read_file(file_path: str, file_name: str) -> dict:
     try:
         with open(full_path, "r") as f:
             return {
-                "success": True,
+                "status": True,
                 "data": {
                     "file_path": full_path,
                     "file_name": file_name,
@@ -132,11 +162,18 @@ def read_file(file_path: str, file_name: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.read_file: Error reading file: {file_name}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "file_path": str(full_path),
+                "file_name": file_name,
+                "file_content": None,
+                "file_size": os.path.getsize(full_path),
+                "error": str(e)
+            },
             "message": f"Error reading file: {file_name}: {e}"
         }
     
+@version("1.0.0")
 def write_file(file_path: str, file_name: str, content: str) -> dict:
     """
     Write to a file
@@ -149,9 +186,9 @@ def write_file(file_path: str, file_name: str, content: str) -> dict:
         with open(full_path, "w") as f:
             f.write(content)
         return {
-            "success": True,
+            "status": True,
             "data": {
-                "file_path": full_path,
+                "file_path": str(full_path),
                 "file_name": file_name,
                 "file_content": content,
                 "file_size": os.path.getsize(full_path)
@@ -161,11 +198,18 @@ def write_file(file_path: str, file_name: str, content: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.write_file: Error writing to file: {file_name}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "file_path": str(full_path),
+                "file_name": file_name,
+                "file_content": content,
+                "file_size": os.path.getsize(full_path),
+                "error": str(e)
+            },
             "message": f"Error writing to file: {file_name}: {e}"
         }
 
+@version("1.0.0")
 def append_file(file_path: str, file_name: str, content: str) -> dict:
     """
     Append to a file
@@ -178,9 +222,9 @@ def append_file(file_path: str, file_name: str, content: str) -> dict:
         with open(full_path, "a") as f:
             f.write(content)
         return {
-            "success": True,
+            "status": True,
             "data": {
-                "file_path": full_path,
+                "file_path": str(full_path),
                 "file_name": file_name,
                 "file_content": content,
                 "file_size": os.path.getsize(full_path)
@@ -190,11 +234,16 @@ def append_file(file_path: str, file_name: str, content: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.write_file: Error writing to file: {file_name}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "file_path": str(full_path),
+                "file_name": file_name,
+                "error": str(e)
+            },
             "message": f"Error writing to file: {file_name}: {e}"
         }
 
+@version("1.0.0")
 def list_files(directory_path: str) -> dict:
     """
     List all files in a directory
@@ -204,7 +253,7 @@ def list_files(directory_path: str) -> dict:
     technical_logger.log_info(f"file_management.list_files: Listing files in directory: {directory_path}")
     try:
         return {
-            "success": True,
+            "status": True,
             "data": {
                 "directory_path": folder_path,
                 "files": os.listdir(folder_path)
@@ -214,11 +263,15 @@ def list_files(directory_path: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.list_files: Error listing files in directory: {directory_path}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "directory_path": str(folder_path),
+                "error": str(e)
+            },
             "message": f"Error listing files in directory: {directory_path}: {e}"
         }
 
+@version("1.0.0")
 def list_directories(directory_path: str) -> dict:
     """
     List all directories in a directory
@@ -228,7 +281,7 @@ def list_directories(directory_path: str) -> dict:
     technical_logger.log_info(f"file_management.list_directories: Listing directories in directory: {directory_path}")
     try:
         return {
-            "success": True,
+            "status": True,
             "data": {
                 "directory_path": folder_path,
                 "directories": [d for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
@@ -239,10 +292,14 @@ def list_directories(directory_path: str) -> dict:
         error_logger.log_error(f"file_management.list_directories: Error listing directories in directory: {directory_path}: {e}")
         return {
             "success": False,
-            "data": None,
+            "data": {
+                "directory_path": str(folder_path),
+                "error": str(e)
+            },
             "message": f"Error listing directories in directory: {directory_path}: {e}"
         }
 
+@version("1.0.0")
 def move_file(file_path: str, file_name: str, destination_path: str) -> dict:
     """
     Move a file to a destination directory
@@ -258,7 +315,7 @@ def move_file(file_path: str, file_name: str, destination_path: str) -> dict:
         if os.path.exists(full_path):
             shutil.move(full_path, destination_full_path)
         return {
-            "success": True,
+            "status": True,
             "data": {
                 "old_file_path": full_path,
                 "new_file_path": destination_full_path,
@@ -269,11 +326,16 @@ def move_file(file_path: str, file_name: str, destination_path: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.move_file: Error moving file: {file_name} to {destination_path}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "original_file_path": str(full_path),
+                "copy_file_path": str(destination_full_path),
+                "error": str(e)
+            },
             "message": f"Error moving file: {file_name} to {destination_path}: {e}"
         }
     
+@version("1.0.0")
 def copy_file(file_path: str, file_name: str, destination_path: str) -> dict:
     """
     Copy a file to a destination directory
@@ -288,7 +350,7 @@ def copy_file(file_path: str, file_name: str, destination_path: str) -> dict:
         if os.path.exists(full_path):
             shutil.copy(full_path, destination_full_path)
         return {
-            "success": True,
+            "status": True,
             "data": {
                 "original_file_path": full_path,
                 "copy_file_path": destination_full_path,
@@ -299,11 +361,16 @@ def copy_file(file_path: str, file_name: str, destination_path: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.copy_file: Error copying file: {file_name} to {destination_path}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "original_file_path": str(full_path),
+                "copy_file_path": str(destination_full_path),
+                "error": str(e)
+            },
             "message": f"Error copying file: {file_name} to {destination_path}: {e}"
         }
 
+@version("1.0.0")
 def rename_file(file_path: str, file_name: str, new_name: str) -> dict:
     """
     Rename a file
@@ -317,10 +384,10 @@ def rename_file(file_path: str, file_name: str, new_name: str) -> dict:
         if os.path.exists(old_path) and not os.path.exists(new_path):
             os.rename(old_path, new_path)
         return {
-            "success": True,
+            "status": True,
             "data": {
-                "old_file_path": old_path,
-                "new_file_path": new_path,
+                "old_file_name": file_name,
+                "new_file_name": new_name,
                 "file_name": new_name
             },
             "message": f"File {file_name} renamed successfully to {new_name}"
@@ -328,11 +395,16 @@ def rename_file(file_path: str, file_name: str, new_name: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.rename_file: Error renaming file: {file_name} to {new_name}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "old_file_name": file_name,
+                "new_file_name": new_name,
+                "error": str(e)
+            },
             "message": f"Error renaming file: {file_name} to {new_name}: {e}"
         }
 
+@version("1.0.0")
 def file_exists(file_path: str, file_name: str) -> dict:
     """
     Check if a file exists
@@ -344,7 +416,7 @@ def file_exists(file_path: str, file_name: str) -> dict:
     try:
         if os.path.exists(full_path):
             return {
-                "success": True,
+                "status": True,
                 "data": {
                     "file_path": full_path,
                     "file_name": file_name,
@@ -354,7 +426,7 @@ def file_exists(file_path: str, file_name: str) -> dict:
             }
         else:
             return {
-                "success": False,
+                "status": False,
                 "data": {
                     "file_path": full_path,
                     "file_name": file_name,
@@ -366,11 +438,16 @@ def file_exists(file_path: str, file_name: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.file_exists: Error checking if file exists: {file_name} in {file_path}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "file_path": str(full_path),
+                "file_name": file_name,
+                "error": str(e)
+            },
             "message": f"Error checking if file exists: {file_name} in {file_path}: {e}"
         }
 
+@version("1.0.0")
 def directory_exists(directory_path: str) -> dict:
     """
     Check if a directory exists
@@ -381,7 +458,7 @@ def directory_exists(directory_path: str) -> dict:
     try:
         if os.path.exists(folder_path) and os.path.isdir(folder_path):
             return {
-                "success": True,
+                "status": True,
                 "data": {
                     "directory_path": folder_path,
                     "directory_exists": True
@@ -390,7 +467,7 @@ def directory_exists(directory_path: str) -> dict:
             }
         else:
             return {
-                "success": False,
+                "status": False,
                 "data": {
                     "directory_path": folder_path,
                     "directory_exists": False
@@ -400,8 +477,11 @@ def directory_exists(directory_path: str) -> dict:
     except Exception as e:
         error_logger.log_error(f"file_management.directory_exists: Error checking if directory exists: {directory_path}: {e}")
         return {
-            "success": False,
-            "data": None,
+            "status": False,
+            "data": {
+                "directory_path": str(folder_path),
+                "error": str(e)
+            },
             "message": f"Error checking if directory exists: {directory_path}: {e}"
         }
 
