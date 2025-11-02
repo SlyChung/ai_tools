@@ -10,8 +10,11 @@ from typing import Dict, Any, Optional, List
 # src/library/config.py
 from pathlib import Path
 
+from utilities.decorators import version
+
 PROJECT_ROOT = Path.cwd()
 
+@version("1.0.0")
 class Config:
     """
     Manages Configuration for the library.
@@ -39,6 +42,7 @@ class Config:
             #logger.log_error(f"Error loading configuration from {self.config_file}", e)
             raise
 
+    # deprecated
     def _create_default_config(self) -> Dict[str, Any]:
         """
         Create default configuration.
@@ -144,12 +148,14 @@ class Config:
         Set a value in the configuration.
         """
     
+    # deprecated
     def is_user_whitelisted(self, user_id: int) -> bool:
         """
         Check if a user is whitelisted.
         """
         return user_id in self.get("access_control.whitelisted_users", [])
     
+    # deprecated
     def is_user_admin(self, user_id: int) -> bool:
         """
         Check if a user is an admin.

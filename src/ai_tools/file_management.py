@@ -6,7 +6,7 @@ import shutil
 
 from utilities.config import PROJECT_ROOT
 from utilities.logger import Logger
-from utilities.tool_management import version
+from utilities.decorators import version
 
 error_logger = Logger("error")
 technical_logger = Logger("technical")

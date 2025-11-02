@@ -8,7 +8,7 @@ import json
 
 from ai_tools import file_management as fm
 from ai_tools import format as fmt
-from ai_tools.tool_management import version
+from utilities.decorators import version
 
 
 error_logger = Logger("error")

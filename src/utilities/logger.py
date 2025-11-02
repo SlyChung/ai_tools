@@ -12,9 +12,12 @@ Note:
 import logging
 import json
 from pathlib import Path
+
 from utilities.config import PROJECT_ROOT
 from utilities.config import Config
+from utilities.decorators import version
 
+@version("1.0.0")
 class Logger:
     def __init__(self, logger_type: str, vault_log: str = None, config = Config):
         self.logger_type = logger_type
