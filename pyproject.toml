@@ -6,13 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "ai-tools"
 version = "0.1.0"
 description = "Unified utilities for the AI ecosystem"
-authors = [{name = "Andrew"}]
+authors = [{ name = "Andrew" }]
 readme = "README.md"
-license = {text = ""}
-requires-python = "3.10"
-dependencies = [
-    
-]
+requires-python = ">=3.10"
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/SlyChung/ai_tools"
@@ -20,9 +17,7 @@ Homepage = "https://github.com/SlyChung/ai_tools"
 [tool.setuptools]
 package-dir = { "" = "src" }
 
-# Use exactly one of the two blocks below. I prefer the 'find' table:
-
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["ai_tools*"]
+include = ["ai_tools*", "utilities"]
 exclude = ["tests*", "docs*"]
