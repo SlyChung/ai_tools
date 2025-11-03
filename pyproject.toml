@@ -19,5 +19,5 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["ai_tools*", "utilities"]
+include = ["ai_tools*", "utilities*"]
 exclude = ["tests*", "docs*"]
