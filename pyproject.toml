@@ -17,13 +17,12 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/SlyChung/ai_tools"
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+# Use exactly one of the two blocks below. I prefer the 'find' table:
+
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.packages.find]
-# Ensure both packages are discovered
-include = ["ai_tools*", "utilities*"]
-namespaces = false
+include = ["ai_tools*"]
+exclude = ["tests*", "docs*"]
