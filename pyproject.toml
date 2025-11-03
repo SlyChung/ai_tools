@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/eliot_tools"
+Homepage = "https://github.com/SlyChung/ai_tools"
 
 [tool.setuptools.packages.find]
 where = ["src"]
