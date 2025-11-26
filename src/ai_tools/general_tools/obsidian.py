@@ -8,8 +8,8 @@ from pathlib import Path
 from utilities.logger import Logger
 import json
 
-from ai_tools import file_management as fm
-from ai_tools import format as fmt
+from general_tools import file_management as fm
+from general_tools import format as fmt
 from utilities.decorators import version
 
 
