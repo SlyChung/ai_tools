@@ -9,7 +9,9 @@ description = "Unified utilities for the AI ecosystem"
 authors = [{ name = "Andrew" }]
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    pyyaml
+]
 
 [project.urls]
 Homepage = "https://github.com/SlyChung/ai_tools"

@@ -12,26 +12,53 @@ class ToolEnvelope:
     def __init__(self, tool: Any):
         self.tool = tool
         self.name = tool.__name__
-        self.tool_version = tool.__version__
+        self.tool_version = getattr(tool, "__version__", "0.0.0")
         self.description = inspect.getdoc(tool) or ""
-        self.parameters = get_type_hints(tool)
-        self.required_parameters = [param for param in self.parameters if self.parameters[param].default is inspect._empty]
-        self.optional_parameters = [param for param in self.parameters if self.parameters[param].default is not inspect._empty]
-        self.output_type = get_type_hints(tool).get("return", None)
-        self.result_status = None
-        self.result_message = None
-        self.result_data = None
-        self.citations = None
-        self.artifacts = None
+        self.signature = inspect.signature(tool)
+        self.parameters = self.signature.parameters
+        self.required_parameters = [
+            p for p, obj in self.parameters.items()
+            if obj.default is inspect._empty and obj.kind in (obj.POSITIONAL_OR_KEYWORD, obj.KEYWORD_ONLY)
+        ]
+        self.optional_parameters = [
+            p for p, obj in self.parameters.items()
+            if obj.default is not inspect._empty and obj.kind in (obj.POSITIONAL_OR_KEYWORD, obj.KEYWORD_ONLY)
+        ]
+        self.output_type = self.signature.return_annotation
 
-    def execute(self, input: str) -> str:
-        """
-        Execute the tool with the given input.
-        """
+        # result fields
+        self.result_status: bool | None = None
+        self.result_message: str | None = None
+        self.result_data: Any = None
+        self.citations: List[Dict[str, Any]] | None = None
+        self.artifacts: List[Dict[str, Any]] | None = None
 
-        self.call_envelope()
-        self.result_envelope()
-        self.envelope()
+    def execute(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute the tool with given dict inputs and build the envelope."""
+        # build call metadata first
+        self._call_envelope = self.call_envelope()
+
+
+        # run the tool
+        result = self.tool(**inputs)
+
+
+        # map common shapes into fields; fall back gracefully
+        if isinstance(result, dict):
+            self.result_status = result.get("status")
+            self.result_message = result.get("message")
+            self.result_data = result.get("data")
+            self.citations = result.get("citations")
+            self.artifacts = result.get("artifacts")
+        else:
+            self.result_status = True
+            self.result_message = "ok"
+            self.result_data = result
+
+
+        self._result_envelope = self.result_envelope()
+        self._envelope = self.envelope()
+        return self._envelope
         
     
     
@@ -147,25 +174,26 @@ class ToolEnvelope:
     
     # ----- Tool Envelopes -----
 
-    def call_envelope(self) -> dict:
-        """
-        Get the call envelope of the tool.
-        """
-        self.call_envelope = {
+    def call_envelope(self) -> Dict[str, Any]:
+        return {
             "name": self.name,
             "version": self.tool_version,
             "description": self.description,
-            "parameters": self.parameters,
+            "parameters": {
+                k: {
+                    "kind": str(v.kind),
+                    "default": None if v.default is inspect._empty else v.default,
+                    "annotation": str(v.annotation) if v.annotation is not inspect._empty else None,
+                }
+                for k, v in self.parameters.items()
+            },
             "required_parameters": self.required_parameters,
             "optional_parameters": self.optional_parameters,
-            "output_type": self.output_type,
+            "output_type": str(self.output_type),
         }
     
-    def result_envelope(self) -> dict:
-        """
-        Get the result envelope of the tool.
-        """
-        self.result_envelope = {
+    def result_envelope(self) -> Dict[str, Any]:
+        return {
             "status": self.result_status,
             "message": self.result_message,
             "data": self.result_data,

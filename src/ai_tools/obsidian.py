@@ -3,6 +3,8 @@ Tools for interacting with Obsidian.
 """
 
 from datetime import datetime
+from typing import List
+from pathlib import Path
 from utilities.logger import Logger
 import json
 
@@ -251,21 +253,64 @@ def swap_active_vault(vault_name: str) -> dict:
                 "message": f"Error swapping active vault: {e}"
             }
     
-@version("1.0.0")
+@version("1.0.1")
 def list_vaults() -> dict:
     """
     List all vaults.
+
+    When to use:
+     - You need the set of available vaults before reading/writing notes.
+     - You want a normalized, sorted list of vault folder names (not full paths).
+
+    Inputs:
+     - (none)
+
+    Outputs (dict):
+     - status: bool
+     - data: { 
+         vault_directories: list[str],   # folder names only
+         vault_count: int, 
+         error?: str 
+         }
+     - message: human-readable outcome
+
+    Notes:
+     - Scans PROJECT_ROOT/vaults using fm.list_direct_subdirectories("vaults").
+     - Tolerates items as strings or dicts with {name|path}; returns just the folder names.
+     - Results are sorted alphabetically.
+     - Fails if the underlying directory cannot be listed (missing path, permissions, etc.).
+
     """
+
+    technical_logger.log_info("vaults.list_vaults: Listing vaults")
+
     try:
         # Get all vault directories
-        vault_directories = fm.list_directories("vaults")
+        resp = fm.list_direct_subdirectories("vaults")
+
+        if not resp.get("status"):
+            raise RuntimeError(resp.get("message", "Failed to list vaults"))
+
+        items = resp.get("data", {}).get("directories", [])
+
+        def _to_name(x) -> str:
+            if isinstance(x, dict):
+                # tolerate dict-shaped entries
+                return x.get("name") or Path(x.get("path", "")).name
+            return Path(x).name  # handle both bare names & paths
+
+        vault_directories: List[str] = sorted([n for n in (_to_name(i) for i in items) if n])
+
+        message = f"Found {len(vault_directories)} vault(s)"
+        technical_logger.log_info(f"vaults.list_vaults: {message}")
 
         # Return the vault directories
         return {"status": True, 
                 "data": {
-                    "vault_directories": vault_directories
+                    "vault_directories": vault_directories,
+                    "vault_count": len(vault_directories)
                 },
-                "message": "Vaults listed"
+                "message": message
             }
     
     # If an error occurs, log the error and return None
@@ -400,26 +445,69 @@ def confirm_vault_setup(vault_name: str) -> dict:
                 "message": f"Error confirming vault setup: {e}"
             }
     
-@version("1.0.0")
-def create_note(note_name: str, note_content: str, note_path: str) -> dict:
+@version("1.0.1")
+def create_new_note(note_name: str, note_content: str, vault_name: str, note_path: str = "") -> dict:
     """
-    Create a new note.
+    Creates a new note in the specified vault.
+
+    When to use:
+     - You want to create a Markdown note inside an existing vault (and fail if it already exists).
+     - You want automatic filename sanitization (spaces → underscores, ensure `.md` extension).
+
+    Inputs:
+     - note_name: Desired note filename (e.g., "Daily Notes.md"). If valid, spaces are replaced with "_" and ".md" is appended if missing.
+     - note_content: Text content to write into the note.
+     - vault_name: Name of the target vault (under PROJECT_ROOT/vaults).
+     - note_path: Optional subfolder inside the vault (e.g., "/Projects/ELIOT"); if empty, the note is placed at the vault root.
+
+    Outputs (dict):
+     - status: bool
+     - data: { 
+         note_name: str, 
+         note_path: str, 
+         error?: str }
+     - message: human-readable outcome
+
+    Notes:
+     - Resolves the full note directory to "vaults/{vault_name}" or "vaults/{vault_name}{note_path}".
+     - note_path must start with a "/", and end with a "/", vault directory is not included in the note_path.
+     - vault_name must be a valid vault name, and must be a subdirectory of PROJECT_ROOT/vaults.
+     - vault_name must not start with a "/", and must not end with a "/".
+     - Fails if the note already exists; then no file is created or written.
+     - Expects parent directories to exist (create them upstream if needed).
+     - Uses fm.create_file(...) then fm.write_file(...) to persist content.
     """
     try:
+
+        # Get the active vault
+        #active_vault = get_active_vault()
+        active_vault = vault_name
+        
+        if not fm.is_valid_filename(note_name):
+            error_logger.log_error(f"Note name {note_name} is not valid")
+            raise ValueError(f"Note name {note_name} is not valid")
+        else:
+            note_name = note_name.replace(" ", "_")
+            if not note_name.endswith(".md"):
+                note_name = note_name + ".md"
+        
+        # Get the note path
+        if note_path == "":
+            note_path = f"vaults/{active_vault}"
+        else:
+            note_path = f"vaults/{active_vault}{note_path}"
+
         # Check if the note already exists
-        if fm.file_exists(note_path):
+        if fm.file_exists(note_path, note_name):
             error_logger.log_error(f"Note {note_name} already exists in {note_path}")
             return {"status": False, 
                     "data": {
                         "note_name": note_name,
                         "note_path": note_path,
-                        "error": "note_already_exists"
+                        "error": "Note already exists"
                     },
-                    "message": f"Note {note_name} already exists in {note_path}"
+                    "message": f"Note {note_name} already exists in {vault_name}{note_path}"
                 }
-
-        # Get the active vault
-        active_vault = get_active_vault()
 
         # Create the note
         fm.create_file(note_path, note_name)
@@ -448,7 +536,33 @@ def create_note(note_name: str, note_content: str, note_path: str) -> dict:
                 },
                 "message": f"Error creating note {note_name} in {note_path}: {e}"
             }
+
+@version("1.0.0")
+def create_new_note_from_template(note_name: str, note_content: str, vault_name: str, note_path: str = "") -> dict:
+    """
+    Creates a new note in the specified vault from a template.
+    """
+    pass
+
+
+@version("1.0.0")
+def rewrite_note(note_name: str, note_content: str, vault_name: str, note_path: str = "") -> dict:
+    """
+    Rewrites an existing note in the specified vault.
+    """
+
     
+    pass
+
+# Might not need this due to embedding?
+@version("1.0.0")
+def read_note(note_name: str, vault_name: str, note_path: str = "") -> dict:
+    """
+    Reads a note from the specified vault.
+    """
+    pass
+
+
 @version("1.0.0")
 def get_tags() -> dict:
     """
