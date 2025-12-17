@@ -1,5 +1,7 @@
 """
 File management tools for the scribe.
+
+TODO: Need to fix the descriptions since these functions are not in direct use by agents.
 """
 import os
 import sys
@@ -233,32 +235,13 @@ def read_file(file_path: str, file_name: str) -> dict:
     technical_logger.log_info(f"file_management.read_file: Reading file: {file_name}")
     try:
         with open(full_path, "r") as f:
-            return {
-                "status": True,
-                "data": {
-                    "file_path": full_path,
-                    "file_name": file_name,
-                    "file_content": f.read(),
-                    "file_size": os.path.getsize(full_path)
-                },
-                "message": f"File {file_name} read successfully"
-            }
+            return f.read()
     except Exception as e:
         error_logger.log_error(f"file_management.read_file: Error reading file: {file_name}: {e}")
-        return {
-            "status": False,
-            "data": {
-                "file_path": str(full_path),
-                "file_name": file_name,
-                "file_content": None,
-                "file_size": os.path.getsize(full_path),
-                "error": str(e)
-            },
-            "message": f"Error reading file: {file_name}: {e}"
-        }
+        raise FileManagementError(f"Error reading file: {file_name}: {e}")
     
 @version("1.0.1")
-def write_file(file_path: str, file_name: str, content: str) -> dict:
+def write_file(file_path: str, file_name: str, content: str) -> None:
     """
     Write to a file
 
@@ -271,16 +254,8 @@ def write_file(file_path: str, file_name: str, content: str) -> dict:
      - file_name: Name of the file to write.
      - content: String data to write to the file.
 
-    Outputs (dict):
-     - status: bool
-     - data: { 
-         file_path: str, 
-         file_name: str, 
-         file_content: str,       # echo of what was written
-         file_size: int | None,   # bytes on disk after write
-         error?: str 
-         }
-     - message: human-readable outcome
+    Outputs:
+     - None
 
     Notes:
      - Opens in text mode with default platform encoding; not suitable for binary data.
@@ -297,29 +272,9 @@ def write_file(file_path: str, file_name: str, content: str) -> dict:
         technical_logger.log_info(f"file_management.write_file: Writing to file: {file_name}")
         with open(full_path, "w") as f:
             f.write(content)
-        return {
-            "status": True,
-            "data": {
-                "file_path": str(full_path),
-                "file_name": file_name,
-                "file_content": content,
-                "file_size": os.path.getsize(full_path)
-            },
-            "message": f"File {file_name} written successfully"
-        }
     except Exception as e:
         error_logger.log_error(f"file_management.write_file: Error writing to file: {file_name}: {e}")
-        return {
-            "status": False,
-            "data": {
-                "file_path": str(full_path),
-                "file_name": file_name,
-                "file_content": content,
-                "file_size": os.path.getsize(full_path),
-                "error": str(e)
-            },
-            "message": f"Error writing to file: {file_name}: {e}"
-        }
+        raise FileManagementError(f"Error writing to file: {file_name}: {e}")
 
 @version("1.0.1")
 def append_file(file_path: str, file_name: str, content: str) -> dict:
@@ -913,3 +868,9 @@ def find_file(file_id: str) -> list[str]:
     """
     pass
         
+
+class FileManagementError(Exception):
+    """
+    Exception raised for errors in the file management tool.
+    """
+    pass
