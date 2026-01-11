@@ -13,9 +13,9 @@ import logging
 import json
 from pathlib import Path
 
-from utilities.config import PROJECT_ROOT
-from utilities.config import Config
-from utilities.decorators import version
+from ai_tools.utilities import config as config_module
+from ai_tools.utilities.config import Config
+from ai_tools.utilities.decorators import version
 
 @version("1.0.0")
 class Logger:
@@ -27,11 +27,14 @@ class Logger:
         self._configure_logger()
 
     def _configure_logger(self):
+        # Get PROJECT_ROOT at runtime to allow for patching in tests
+        project_root = config_module.PROJECT_ROOT
+
         # Get the log path
         if self.vault_log:
-            self.log_path = str(Path(PROJECT_ROOT, f"logs/vaults/{self.vault_log}.log"))
+            self.log_path = str(Path(project_root, f"logs/vaults/{self.vault_log}.log"))
         else:
-            self.log_path = str(Path(PROJECT_ROOT, self.config.get(f"logging.log_format.{self.logger_type}.file")))
+            self.log_path = str(Path(project_root, self.config.get(f"logging.log_format.{self.logger_type}.file")))
 
         # Get the log level
         level_str = self.config.get(f"logging.log_format.{self.logger_type}.level", default="INFO")

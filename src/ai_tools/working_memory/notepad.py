@@ -4,6 +4,7 @@ MemoryChunk for the Notepad
 Used to store information, tasks, and as scap paper for the Agent.
 """
 
+from typing import Dict, Any
 from ai_tools.working_memory.memoryChunk import MemoryChunk
 
 class Notepad(MemoryChunk):

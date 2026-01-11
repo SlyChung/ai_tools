@@ -42,11 +42,21 @@ class Config:
             #logger.log_error(f"Error loading configuration from {self.config_file}", e)
             raise
 
+    def _save_config(self, config: Dict[str, Any]) -> None:
+        """
+        Save configuration to the config file.
+
+        Args:
+            config: Configuration dictionary to save
+        """
+        with open(self.config_file, 'w') as f:
+            json.dump(config, f, indent=4)
+
     # deprecated
     def _create_default_config(self) -> Dict[str, Any]:
         """
         Create default configuration.
-        
+
         Returns:
             Dict[str, Any]: Default configuration
         """

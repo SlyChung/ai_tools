@@ -205,7 +205,7 @@ class ToolEnvelope:
         """
         Get the envelope of the tool.
         """
-        self.envelope = {
-            "call": self.call_envelope,
-            "result": self.result_envelope,
+        return {
+            "call": self._call_envelope,
+            "result": self._result_envelope,
         }
