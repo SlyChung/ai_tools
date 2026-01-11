@@ -1,31 +1,69 @@
 """
-Configuration for the library.
+Configuration management for the ai_tools library.
+
+This module provides the Config class for loading and accessing configuration
+values from config.json. Supports dot-path access for nested values and
+optional type casting.
+
+Attributes:
+    PROJECT_ROOT: Path to the project root directory (current working directory).
+
+Example:
+    from ai_tools.utilities.config import Config
+
+    config = Config()
+    log_level = config.get("logging.log_format.error.level")
+    console_enabled = config.get("logging.log_format.error.console", cast_type=bool)
 """
 
 import os
 import json
 from typing import Dict, Any, Optional, List
-#from library.logger import logger
 
-# src/library/config.py
 from pathlib import Path
 
 from utilities.decorators import version
 
 PROJECT_ROOT = Path.cwd()
 
+
 @version("1.0.0")
 class Config:
+    """Configuration manager that loads settings from config.json.
+
+    Provides dot-path access to nested configuration values with optional
+    type casting and default values.
+
+    Attributes:
+        config_file: Path to the configuration file.
+        config: The loaded configuration dictionary.
+
+    Example:
+        config = Config()
+        level = config.get("logging.log_format.error.level", default="INFO")
     """
-    Manages Configuration for the library.
-    """
+
     def __init__(self, config_file: str = "config.json"):
+        """Initialize the Config instance.
+
+        Args:
+            config_file: Name of the configuration file relative to PROJECT_ROOT.
+                Defaults to "config.json".
+        """
         self.config_file = Path(PROJECT_ROOT, config_file)
         self.config = self.load_json()
         
     def load_json(self) -> Dict[str, Any]:
-        """
-        Loads the configuration from the config file.
+        """Load configuration from the JSON config file.
+
+        If the config file doesn't exist, creates a default configuration
+        and saves it.
+
+        Returns:
+            The configuration dictionary loaded from the file.
+
+        Raises:
+            Exception: If the file exists but cannot be read or parsed.
         """
         try:
             if os.path.exists(self.config_file):
@@ -128,11 +166,22 @@ class Config:
             }
         }
         
-    def get(self, path: str, default = None, cast_type = None) -> Any:
-        """
-        Get a value from the configuration.
+    def get(self, path: str, default=None, cast_type=None) -> Any:
+        """Get a value from the configuration using dot-path notation.
 
-        Supports dot-path access.
+        Args:
+            path: Dot-separated path to the config value
+                (e.g., "logging.log_format.error.level").
+            default: Value to return if path doesn't exist. Defaults to None.
+            cast_type: Optional type to cast the value to (e.g., bool, int).
+
+        Returns:
+            The configuration value, cast to cast_type if specified,
+            or default if the path doesn't exist or casting fails.
+
+        Example:
+            config.get("logging.log_format.error.level")  # "ERROR"
+            config.get("logging.log_format.error.console", cast_type=bool)  # False
         """
         keys = path.split(".")
         value = self.config
@@ -154,20 +203,43 @@ class Config:
         return value
     
     def set(self, target: str, value: Any) -> None:
+        """Set a value in the configuration using dot-path notation.
+
+        Args:
+            target: Dot-separated path to the config key to set.
+            value: The value to set.
+
+        Note:
+            Not yet implemented.
         """
-        Set a value in the configuration.
-        """
-    
+        pass
+
     # deprecated
     def is_user_whitelisted(self, user_id: int) -> bool:
-        """
-        Check if a user is whitelisted.
+        """Check if a user is whitelisted.
+
+        Deprecated:
+            This method is deprecated and may be removed in future versions.
+
+        Args:
+            user_id: The user ID to check.
+
+        Returns:
+            True if the user is in the whitelist, False otherwise.
         """
         return user_id in self.get("access_control.whitelisted_users", [])
-    
+
     # deprecated
     def is_user_admin(self, user_id: int) -> bool:
-        """
-        Check if a user is an admin.
+        """Check if a user is an admin.
+
+        Deprecated:
+            This method is deprecated and may be removed in future versions.
+
+        Args:
+            user_id: The user ID to check.
+
+        Returns:
+            True if the user is in the admin list, False otherwise.
         """
         return user_id in self.get("access_control.admin_users", [])

@@ -1,15 +1,18 @@
 """
-NoteV3 is a class that manages the note memoryChunk of a sub-agent.
+NoteV3 memory chunk for markdown note management.
 
-The elements of the note are stored and worked with in a tree structure.
+NoteV3 is the current (MVP) implementation of a note memory chunk. It provides
+basic read/write operations for markdown notes, with planned support for
+tree-structured element manipulation.
 
-The tree structure is class-based, and each element is a class.
+Architecture:
+    - Notes are stored as markdown files on disk
+    - In-memory representation is raw markdown string (note_md)
+    - Future: Tree structure for element-level operations
 
-The tree structure is stored in the class memory.
-
-The tree structure is parsed into a dictionary for agent-style viewing.
-
-The tree structure is parsed into a Markdown string for file storage.
+Tools available:
+    - read_note: Return the note content
+    - write_note: Update the note content
 """
 
 from typing import Dict, Any
@@ -22,8 +25,31 @@ from ai_tools.utilities.decorators import version
 error_logger = Logger("error")
 technical_logger = Logger("technical")
 
+
 class NoteV3(MemoryChunk):
+    """Memory chunk for managing a single markdown note.
+
+    Provides MVP functionality for loading, saving, and manipulating
+    markdown notes. Future versions will support tree-structured
+    element manipulation.
+
+    Attributes:
+        note_id: Unique identifier for this note (also chunk_id).
+        note_md: Raw markdown content of the note.
+        note_location: Tuple of (file_path, file_name) after loading.
+        tools: Dictionary mapping tool names to methods.
+
+    Available Tools:
+        read_note: Returns the current note content.
+        write_note: Updates the note content in memory.
+    """
+
     def __init__(self, note_id: str):
+        """Initialize a NoteV3 instance and load from disk.
+
+        Args:
+            note_id: Identifier for the note (used to find the file).
+        """
         super().__init__(note_id)
         self.note_id = note_id
         # self.note = Element(element_id=note_id) # Use a section object to store the note
@@ -37,11 +63,15 @@ class NoteV3(MemoryChunk):
 
     # ----- MemoryChunk Methods -----
 
-    # MVP Version
     @version("1.0.0")
-    def load(self) -> dict:
-        """
-        Load the note from the file system
+    def load(self) -> Dict[str, Any]:
+        """Load the note from disk into memory.
+
+        Finds the note file using find_file() and reads its content
+        into the note_md attribute.
+
+        Returns:
+            Dictionary with status, data (note details), and message.
         """
         # Find the note in the file system given the note id
         try:
@@ -92,11 +122,14 @@ class NoteV3(MemoryChunk):
             "message": f"Note {self.note_id} loaded successfully"
         }
     
-    # MVP Version
     @version("1.0.0")
-    def save(self) -> dict:
-        """
-        Save the note to the file system
+    def save(self) -> Dict[str, Any]:
+        """Save the note from memory to disk.
+
+        Writes the current note_md content to the file at note_location.
+
+        Returns:
+            Dictionary with status, data (note details, file_size), and message.
         """
 
         # Save the note to the file system
@@ -127,9 +160,19 @@ class NoteV3(MemoryChunk):
 
 
     @version("1.0.0")
-    def execute_tool(self, args: Dict[str, Any]) -> None:
-        """
-        Execute a tool on the note
+    def execute_tool(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a tool operation on this note.
+
+        Args:
+            args: Dictionary with 'tool' key specifying the tool name,
+                plus any tool-specific arguments.
+
+        Returns:
+            Dictionary with status, data, and message from the tool.
+
+        Available tools:
+            read_note: No additional args required.
+            write_note: Requires 'content' arg with new note text.
         """
 
         # Receive the tool and arguments as a dictionary
@@ -291,11 +334,13 @@ class NoteV3(MemoryChunk):
     
     #----- MVP Tools -----
 
-    # MVP Version
     @version("1.0.0")
-    def read_note(self) -> dict:
-        """
-        Return the note in Markdown format from the class memory
+    def read_note(self) -> Dict[str, Any]:
+        """Return the current note content from memory.
+
+        Returns:
+            Dictionary with status=True, data containing note_id and
+            note_content, and success message.
         """
 
         # Return the note in Markdown format from the class memory
@@ -309,11 +354,19 @@ class NoteV3(MemoryChunk):
         }
         
     
-    # MVP Version
     @version("1.0.0")
-    def write_note(self, note_content: str) -> dict:
-        """
-        Write the note in Markdown format to the class memory
+    def write_note(self, note_content: str) -> Dict[str, Any]:
+        """Update the note content in memory.
+
+        Note: This updates the in-memory content only. Call save()
+        to persist changes to disk.
+
+        Args:
+            note_content: New markdown content for the note.
+
+        Returns:
+            Dictionary with status=True, data containing note_id and
+            updated note_content, and success message.
         """
         
         # Write the note in Markdown format to the class memory

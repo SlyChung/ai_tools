@@ -1,15 +1,61 @@
 """
-This module contains the ToolEnvelope class, which is used to standardize the IO of tools.
+Standardized wrapper for tool input/output handling.
+
+This module provides the ToolEnvelope class, which wraps callable tools
+to provide consistent metadata extraction, execution, and result formatting.
+All tool calls produce a standardized envelope containing call metadata
+and result data.
+
+Example:
+    from ai_tools.utilities.tool_envelope import ToolEnvelope
+
+    @version("1.0.0")
+    def my_tool(param1: str) -> dict:
+        return {"status": True, "data": {"result": param1}}
+
+    envelope = ToolEnvelope(my_tool)
+    result = envelope.execute({"param1": "value"})
+    # result contains {"call": {...}, "result": {...}}
 """
 
 import inspect
 from typing import Any, Dict, List, Optional, get_type_hints
 
+
 class ToolEnvelope:
+    """Wrapper that standardizes tool execution and result formatting.
+
+    Extracts metadata from a callable (name, version, parameters, types)
+    and provides a consistent interface for execution and result access.
+
+    The envelope format separates call metadata from result data:
+    - call: Tool name, version, description, parameters, types
+    - result: status, message, data, citations, artifacts
+
+    Attributes:
+        tool: The wrapped callable.
+        name: Name of the tool function.
+        tool_version: Version string from __version__ attribute.
+        description: Tool's docstring.
+        signature: Function signature object.
+        parameters: Dictionary of parameter objects.
+        required_parameters: List of required parameter names.
+        optional_parameters: List of optional parameter names.
+        output_type: Return type annotation.
+        result_status: Execution status (True/False/None).
+        result_message: Human-readable result message.
+        result_data: The actual result data.
+        citations: Optional list of citation references.
+        artifacts: Optional list of artifacts produced.
     """
-    This class is used to standardize the IO of tools.
-    """
+
     def __init__(self, tool: Any):
+        """Initialize a ToolEnvelope with a callable.
+
+        Args:
+            tool: A callable (function or method) to wrap. May have a
+                __version__ attribute from the @version decorator.
+        """
         self.tool = tool
         self.name = tool.__name__
         self.tool_version = getattr(tool, "__version__", "0.0.0")
@@ -34,7 +80,15 @@ class ToolEnvelope:
         self.artifacts: List[Dict[str, Any]] | None = None
 
     def execute(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute the tool with given dict inputs and build the envelope."""
+        """Execute the wrapped tool and return a standardized envelope.
+
+        Args:
+            inputs: Dictionary of parameter names to values to pass to the tool.
+
+        Returns:
+            A dictionary with 'call' and 'result' keys containing metadata
+            and execution results respectively.
+        """
         # build call metadata first
         self._call_envelope = self.call_envelope()
 
@@ -175,6 +229,12 @@ class ToolEnvelope:
     # ----- Tool Envelopes -----
 
     def call_envelope(self) -> Dict[str, Any]:
+        """Build the call metadata envelope.
+
+        Returns:
+            Dictionary containing tool metadata: name, version, description,
+            parameters, required/optional parameters, and output type.
+        """
         return {
             "name": self.name,
             "version": self.tool_version,
@@ -193,6 +253,12 @@ class ToolEnvelope:
         }
     
     def result_envelope(self) -> Dict[str, Any]:
+        """Build the result envelope.
+
+        Returns:
+            Dictionary containing execution results: status, message,
+            data, citations, and artifacts.
+        """
         return {
             "status": self.result_status,
             "message": self.result_message,
@@ -200,10 +266,13 @@ class ToolEnvelope:
             "citations": self.citations,
             "artifacts": self.artifacts,
         }
-    
-    def envelope(self) -> dict:
-        """
-        Get the envelope of the tool.
+
+    def envelope(self) -> Dict[str, Any]:
+        """Get the complete tool envelope with call and result sections.
+
+        Returns:
+            Dictionary with 'call' containing tool metadata and 'result'
+            containing execution results. Only valid after execute() is called.
         """
         return {
             "call": self._call_envelope,

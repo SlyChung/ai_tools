@@ -1,12 +1,18 @@
 """
-Logger class
+Configurable logging system for the ai_tools package.
 
-Important information:
-- The logger is configured in the config.json file.
-- Unsure what part of the code is responsible for creating the log files.
+This module provides a Logger class that wraps Python's logging module,
+configured via config.json. Supports multiple logger types (app, error,
+api, vault, technical, database) with separate output files and formats.
 
-Note:
-- This logger is a more updated version of the logger in Scribe_V3 - 9/2/25.
+Example:
+    from ai_tools.utilities.logger import Logger
+
+    error_logger = Logger("error")
+    error_logger.log_error("Something went wrong")
+
+    technical_logger = Logger("technical")
+    technical_logger.log_debug("Debug information")
 """
 
 import logging
@@ -17,9 +23,40 @@ from ai_tools.utilities import config as config_module
 from ai_tools.utilities.config import Config
 from ai_tools.utilities.decorators import version
 
+
 @version("1.0.0")
 class Logger:
-    def __init__(self, logger_type: str, vault_log: str = None, config = Config):
+    """Configurable logger that reads settings from config.json.
+
+    Supports six logger types configured in config.json:
+    - app: General application logging
+    - error: Error-only logging
+    - api: API interaction logging
+    - vault: Vault operation logging
+    - technical: Debug/technical logging
+    - database: Database operation logging
+
+    Each logger type can have its own log level, file path, format,
+    and optional console output configured in config.json.
+
+    Attributes:
+        logger_type: The type of logger (e.g., "error", "technical").
+        vault_log: Optional vault-specific log file name.
+        config: Configuration instance for reading settings.
+        logger: The underlying Python logging.Logger instance.
+        log_path: Path to the log file.
+    """
+
+    def __init__(self, logger_type: str, vault_log: str = None, config=Config):
+        """Initialize a Logger instance.
+
+        Args:
+            logger_type: Type of logger to create. Must match a key in
+                config.json under logging.log_format (e.g., "error", "technical").
+            vault_log: Optional vault name for vault-specific logging.
+                If provided, logs go to logs/vaults/{vault_log}.log.
+            config: Configuration class to use. Defaults to Config.
+        """
         self.logger_type = logger_type
         self.vault_log = vault_log
         self.config = config()
@@ -62,22 +99,52 @@ class Logger:
 
     # --------- Logging methods ---------
 
-    def log_debug(self, message: str):
+    def log_debug(self, message: str) -> None:
+        """Log a debug-level message.
+
+        Args:
+            message: The message to log.
+        """
         self.logger.debug(message)
 
-    def log_info(self, message: str):
+    def log_info(self, message: str) -> None:
+        """Log an info-level message.
+
+        Args:
+            message: The message to log.
+        """
         self.logger.info(message)
 
-    def log_warning(self, message: str):
+    def log_warning(self, message: str) -> None:
+        """Log a warning-level message.
+
+        Args:
+            message: The message to log.
+        """
         self.logger.warning(message)
 
-    def log_error(self, message: str):
+    def log_error(self, message: str) -> None:
+        """Log an error-level message.
+
+        Args:
+            message: The message to log.
+        """
         self.logger.error(message)
-    
-    def log_critical(self, message: str):
+
+    def log_critical(self, message: str) -> None:
+        """Log a critical-level message.
+
+        Args:
+            message: The message to log.
+        """
         self.logger.critical(message)
 
-    def log_user_action(self, message: str):
+    def log_user_action(self, message: str) -> None:
+        """Log a user action at info level with [USER ACTION] prefix.
+
+        Args:
+            message: The user action to log.
+        """
         self.logger.info(f"[USER ACTION] {message}")
 
     

@@ -1,5 +1,8 @@
 """
-This module contains small functions to manage tools.
+Decorators for managing tool metadata and versioning.
+
+This module provides decorators that can be applied to functions and classes
+to attach version information and other metadata.
 """
 
 import re
@@ -7,8 +10,29 @@ from functools import wraps
 
 _SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 
+
 def version(v: str):
-    # Optional: enforce simple SemVer like "0.1.0"
+    """Attach a semantic version string to a function or class.
+
+    This decorator adds a `__version__` attribute to the decorated object,
+    allowing version tracking at the function or class level.
+
+    Args:
+        v: Version string in MAJOR.MINOR.PATCH format (e.g., "1.0.0").
+
+    Returns:
+        A decorator that attaches the version to the target object.
+
+    Raises:
+        ValueError: If the version string doesn't match MAJOR.MINOR.PATCH format.
+
+    Example:
+        @version("1.0.0")
+        def my_function():
+            pass
+
+        print(my_function.__version__)  # "1.0.0"
+    """
     if not _SEMVER.match(v):
         raise ValueError(f"Invalid version '{v}'. Use MAJOR.MINOR.PATCH, e.g. 0.1.0")
 

@@ -1,10 +1,19 @@
 """
-TaskMemory is a class that manages the task memory of the sub-agent..
+Base working memory for sub-agents.
+
+WorkingMemory extends Memory with functionality specific to sub-agents,
+providing a foundation for specialized sub-agent memory types like
+NoteWriterMemory and VaultManagerMemory.
 
 Contracted Fields:
-- plan_id: str
+    plan_id: Reference to the parent plan this sub-agent is executing.
 
-
+Subclasses should implement chunk-specific methods:
+    - load_chunk: Load a chunk from storage
+    - save_chunk: Save a chunk to storage
+    - delete_chunk: Delete a chunk
+    - close_chunk: Close a chunk
+    - refresh_chunk: Refresh a chunk from source
 """
 
 from typing import Dict, Any, Optional
@@ -12,34 +21,38 @@ import uuid
 
 from ai_tools.working_memory.Memory import Memory
 
+
 class WorkingMemory(Memory):
+    """Base working memory class for sub-agents.
+
+    Extends Memory with a foundation for sub-agent-specific implementations.
+    Subclasses (NoteWriterMemory, etc.) add domain-specific chunk handling.
+
+    Attributes:
+        Inherits id and chunks from Memory.
+    """
+
     def __init__(self):
+        """Initialize a WorkingMemory instance."""
         super().__init__()
 
-    
-    # ----- MemoryChunk Methods -----
-    """
-    For each chunk type, we need to implement the following methods:
-    - load_chunk
-    - save_chunk
-    - delete_chunk
-    - close_chunk
-    - refresh_chunk
-
-
-    """
-    
-    # ----- Important Methods -----
     def envelope(self) -> Dict[str, Any]:
-        """
-        Get the task memory as a dictionary
+        """Get the working memory state as a dictionary.
+
+        Returns:
+            Dictionary mapping chunk IDs to their envelope representations.
         """
         return super().envelope()
-    
-    # ----- Interactive Methods -----
-    def execute_tool(self, chunk_id: str, args: Dict[str, Any]) -> None:
+
+    def execute_tool(self, chunk_id: str, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a tool operation on a specific chunk.
+
+        Args:
+            chunk_id: ID of the chunk to operate on.
+            args: Dictionary of arguments for the tool.
+
+        Returns:
+            Dictionary with status, data, and message from execution.
         """
-        Execute a tool on a chunk
-        """
-        super().execute_tool(chunk_id, args)
+        return super().execute_tool(chunk_id, args)
     

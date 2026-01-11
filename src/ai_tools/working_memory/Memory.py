@@ -1,18 +1,16 @@
 """
-This module is the structure for the working memory of the AI.
-It is a tree of notes, sections, and tasks.
+Abstract base class for AI agent working memory.
 
-The working memory will be a part of the system prompt of an agent.
+This module defines the Memory class, which serves as the foundation for
+managing an agent's working memory. Memory stores a collection of "chunks"
+(notes, tasks, etc.) that form part of the agent's context.
 
-What the working memory will do is:
-- Store the tasks that the agent is working on
-- Store the memory chunks that the agent is working on
-- Output all memory chunks as a list of dictionaries
+The memory system is designed to:
+- Store and manage memory chunks the agent is working on
+- Provide a standardized interface for chunk operations
+- Output memory state as dictionaries for system prompt injection
 
-Memory Mandatory Methods:
-- add_memory_chunk
-- close_memory_chunk
-- refresh_memory
+Subclasses should implement chunk-specific loading and management logic.
 """
 
 from typing import List, Dict, Optional, Any
@@ -29,30 +27,60 @@ from utilities.logger import Logger
 error_logger = Logger("error")
 technical_logger = Logger("technical")
 
+
 @version("1.0.0")
 class Memory:
+    """Abstract base class for agent working memory.
+
+    Memory manages a collection of MemoryChunk objects, providing common
+    operations for opening, closing, and interacting with chunks.
+
+    Subclasses (WorkingMemory, etc.) extend this with domain-specific
+    chunk types and loading logic.
+
+    Attributes:
+        id: Unique identifier for this memory instance.
+        chunks: Dictionary mapping chunk IDs to MemoryChunk objects.
+    """
+
     def __init__(self):
+        """Initialize a new Memory instance with a unique ID."""
         self.id = str(uuid.uuid4())
         self.chunks = {}
 
     def load(self, self_id: str) -> None:
-        """
-        Load the memory from the file system
-        To load in an existing memory, we need to pass in the memory id
+        """Load an existing memory from persistent storage.
+
+        Args:
+            self_id: The ID of the memory instance to load.
+
+        Note:
+            Not yet implemented. Subclasses should override.
         """
         pass
 
     def open_memory_chunk(self, chunk_name: str, chunk_type: str) -> None:
-        """
-        Add a chunk to the working memory
+        """Open and add a new memory chunk.
+
+        Args:
+            chunk_name: Name/identifier for the chunk.
+            chunk_type: Type of chunk to create.
+
+        Note:
+            Not yet implemented. Subclasses should override with
+            chunk-type-specific logic.
         """
         pass
 
-    # Finished, no need to override
     @version("1.0.0")
-    def close_memory_chunk(self, chunk_id: str) -> None:
-        """
-        Delete a chunk from the working memory
+    def close_memory_chunk(self, chunk_id: str) -> Dict[str, Any]:
+        """Close and remove a memory chunk.
+
+        Args:
+            chunk_id: ID of the chunk to close.
+
+        Returns:
+            Dictionary with status, data, and message fields.
         """
         try:
             self.chunks[chunk_id].delete()
@@ -74,11 +102,15 @@ class Memory:
                 "message": f"Error closing memory chunk: {e}"
             }
 
-    # Finished, no need to override
     @version("1.0.0")
     def envelope(self) -> Dict[str, Any]:
-        """
-        Get the working memory as a dictionary
+        """Get the entire memory state as a dictionary.
+
+        Iterates through all chunks and collects their envelope representations
+        for injection into an agent's system prompt.
+
+        Returns:
+            Dictionary mapping chunk IDs to their envelope dictionaries.
         """
         memory_envelope = {}
         for chunk in self.chunks:
@@ -86,11 +118,16 @@ class Memory:
 
         return memory_envelope
 
-    # Finished, no need to override
     @version("1.0.0")
     def execute_tool(self, chunk_id: str, args: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Execute a tool on a chunk
+        """Execute a tool operation on a specific chunk.
+
+        Args:
+            chunk_id: ID of the chunk to operate on.
+            args: Dictionary of arguments to pass to the chunk's tool.
+
+        Returns:
+            Dictionary with status, data, and message from the tool execution.
         """
         try:
             return self.chunks[chunk_id].execute_tool(args)
@@ -106,8 +143,13 @@ class Memory:
             }
             
     def refresh_memory(self) -> None:
-        """
-        Refresh the memory
+        """Refresh all memory chunks from their sources.
+
+        Reloads chunk data from persistent storage to ensure the
+        in-memory state is current.
+
+        Note:
+            Not yet implemented. Subclasses should override.
         """
         pass
 
