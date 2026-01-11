@@ -112,3 +112,6 @@ temp/
 *.tar
 *.tar.gz
 *.rar
+
+# Ignore all folders titled "deprecated"
+**/deprecated/*
