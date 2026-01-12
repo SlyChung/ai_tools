@@ -13,6 +13,38 @@ A Python library providing working memory infrastructure for AI agents. Enables 
 - **Data**: Pydantic for validation, SQLAlchemy/Alembic for future DB support
 - **Utilities**: PyYAML, Jinja2, tiktoken, diskcache
 
+## CRITICAL: Git Workflow Requirements
+
+This repo uses an **integration-branch per subagent** workflow.
+
+## Branch model
+
+- `main` (or `master`): stable, releasable code only.
+- `<subagent>` integration branch: staging branch for a single subagent workstream.
+  - Example: `notewriter`
+- Short-lived work branches: created **from the integration branch**, then merged back into it.
+  - `feature/nw-<short-kebab>`
+  - `fix/nw-<short-kebab>`
+  - `chore/nw-<short-kebab>`
+
+**Policy:** Never develop directly on `main`. Prefer not to develop directly on the integration branch either—treat it like a mini-`main`.
+
+**IMPORTANT**: You MUST follow the Git workflow for all changes:
+
+1. **ALWAYS create a feature branch BEFORE making changes**
+    '''bash
+    git checkout -b feature/[feature-name] # or fix/[bug-name]
+    '''
+
+2. **Commit changes REGULARLY during development**
+    - After completing each major step
+    - When switching between different files/features
+    - Before running build tests
+    - Use meaningful commit messages with [Type] prefix
+
+3. **NEVER work directly on main branch**
+    - All changes must go through feature branches
+
 ## Project Structure
 
 ```
